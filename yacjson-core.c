@@ -16,24 +16,19 @@ YacJSONArray *yacjson_array_new() {
     return yacdoc_arraylist_new();
 }
 
-// TODO
-static void yacjson_value_free(void *value) {
+static void yacjson_value_free_void(void *value) {
     if (yacjson_value_is_string(value)) {
         free(yacjson_value_to_string(value));
     } else if (yacjson_value_is_object(value)) {
-        yacdoc_hashmap_free(yacjson_value_to_object(value), yacjson_value_free);
+        yacdoc_hashmap_free(yacjson_value_to_object(value), yacjson_value_free_void);
     } else if (yacjson_value_is_array(value)) {
-        yacdoc_arraylist_free(yacjson_value_to_array(value), yacjson_value_free);
+        yacdoc_arraylist_free(yacjson_value_to_array(value), yacjson_value_free_void);
     }
     free(value);
 }
 
-void yacjson_object_free(YacJSONObject *object) {
-    yacjson_value_free(object);
-}
-
-void yacjson_array_free(YacJSONArray *array) {
-    yacjson_value_free(array);
+void yacjson_value_free(YacJSONValue *value) {
+    yacjson_value_free_void((void *) value);
 }
 
 YacJSONObjectIterator *yacjson_object_iterator_new(YacJSONObject *object) {

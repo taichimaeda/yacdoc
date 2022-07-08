@@ -37,8 +37,7 @@ typedef struct {
 
 YacJSONObject *yacjson_object_new();
 YacJSONArray *yacjson_array_new();
-void yacjson_object_free(YacJSONObject *object);
-void yacjson_array_free(YacJSONArray *array);
+void yacjson_value_free(YacJSONValue *value);
 
 YacJSONObjectIterator *yacjson_object_iterator_new(YacJSONObject *object);
 YacJSONArrayIterator *yacjson_array_iterator_new(YacJSONArray *array);
