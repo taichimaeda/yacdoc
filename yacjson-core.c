@@ -18,17 +18,14 @@ YacJSONArray *yacjson_array_new() {
 
 // TODO
 static void yacjson_value_free(void *value) {
-    if (yacjson_value_is_primitive(value)) {
-        if (yacjson_value_is_string(value)) {
-            free(yacjson_value_to_string(value));
-        }
-        free(yacjson_value_to_primitive(value));
-        free(value);
+    if (yacjson_value_is_string(value)) {
+        free(yacjson_value_to_string(value));
     } else if (yacjson_value_is_object(value)) {
         yacdoc_hashmap_free(yacjson_value_to_object(value), yacjson_value_free);
     } else if (yacjson_value_is_array(value)) {
         yacdoc_arraylist_free(yacjson_value_to_array(value), yacjson_value_free);
     }
+    free(value);
 }
 
 void yacjson_object_free(YacJSONObject *object) {
@@ -91,40 +88,20 @@ bool yacjson_value_is_array(YacJSONValue *value) {
     return value->type == YACJSON_ARRAY;
 }
 
-bool yacjson_value_is_primitive(YacJSONValue *value) {
-    return value->type == YACJSON_PRIMITIVE;
-}
-
 bool yacjson_value_is_boolean(YacJSONValue *value) {
-    return yacjson_value_is_primitive(value) && value->data.primitive->type == YACJSON_BOOLEAN;
+    return value->type == YACJSON_BOOLEAN;
 }
 
 bool yacjson_value_is_integer(YacJSONValue *value) {
-    return yacjson_value_is_primitive(value) && value->data.primitive->type == YACJSON_INTEGER;
+    return value->type == YACJSON_INTEGER;
 }
 
 bool yacjson_value_is_decimal(YacJSONValue *value) {
-    return yacjson_value_is_primitive(value) && value->data.primitive->type == YACJSON_DECIMAL;
+    return value->type == YACJSON_DECIMAL;
 }
 
 bool yacjson_value_is_string(YacJSONValue *value) {
-    return yacjson_value_is_primitive(value) && value->data.primitive->type == YACJSON_STRING;
-}
-
-bool yacjson_primitive_is_boolean(YacJSONPrimitive *primitive) {
-    return primitive->type == YACJSON_BOOLEAN;
-}
-
-bool yacjson_primitive_is_integer(YacJSONPrimitive *primitive) {
-    return primitive->type == YACJSON_INTEGER;
-}
-
-bool yacjson_primitive_is_decimal(YacJSONPrimitive *primitive) {
-    return primitive->type == YACJSON_DECIMAL;
-}
-
-bool yacjson_primitive_is_string(YacJSONPrimitive *primitive) {
-    return primitive->type == YACJSON_STRING;
+    return value->type == YACJSON_STRING;
 }
 
 YacJSONObject *yacjson_value_to_object(YacJSONValue *value) {
@@ -135,95 +112,70 @@ YacJSONArray *yacjson_value_to_array(YacJSONValue *value) {
     return value->data.array;
 }
 
-YacJSONPrimitive *yacjson_value_to_primitive(YacJSONValue *value) {
-    return value->data.primitive;
-}
-
 bool yacjson_value_to_boolean(YacJSONValue *value) {
-    return yacjson_value_to_primitive(value)->data.boolean;
+    return value->data.boolean;
 }
 
 int yacjson_value_to_integer(YacJSONValue *value) {
-    return yacjson_value_to_primitive(value)->data.integer;
+    return value->data.integer;
 }
 
 double yacjson_value_to_decimal(YacJSONValue *value) {
-    return yacjson_value_to_primitive(value)->data.decimal;
+    return value->data.decimal;
 }
 
 char *yacjson_value_to_string(YacJSONValue *value) {
-    return yacjson_value_to_primitive(value)->data.string;
+    return value->data.string;
 }
 
-bool yacjson_primitive_to_boolean(YacJSONPrimitive *primitive) {
-    return primitive->data.boolean;
-}
-
-int yacjson_primitive_to_integer(YacJSONPrimitive *primitive) {
-    return primitive->data.integer;
-}
-
-double yacjson_primitive_to_decimal(YacJSONPrimitive *primitive) {
-    return primitive->data.decimal;
-}
-
-char *yacjson_primitive_to_string(YacJSONPrimitive *primitive) {
-    return primitive->data.string;
-}
-
-static YacJSONValue *yacjson_value_new_from_object(YacJSONObject *object) {
+static YacJSONValue *yacjson_value_from_object(YacJSONObject *object) {
     YacJSONValue *value = malloc(sizeof(YacJSONValue));
+    assert(value != NULL);
     value->type = YACJSON_OBJECT;
     value->data.object = object;
     return value;
 }
 
-static YacJSONValue *yacjson_value_new_from_array(YacJSONArray *array) {
+static YacJSONValue *yacjson_value_from_array(YacJSONArray *array) {
     YacJSONValue *value = malloc(sizeof(YacJSONValue));
+    assert(value != NULL);
     value->type = YACJSON_ARRAY;
     value->data.array = array;
     return value;
 }
 
-static YacJSONValue *yacjson_value_new_from_primitive(YacJSONPrimitive *primitive) {
+static YacJSONValue *yacjson_value_from_boolean(bool boolean) {
     YacJSONValue *value = malloc(sizeof(YacJSONValue));
-    value->type = YACJSON_PRIMITIVE;
-    value->data.primitive = primitive;
+    assert(value != NULL);
+    value->type = YACJSON_BOOLEAN;
+    value->data.boolean = boolean;
     return value;
 }
 
-static YacJSONPrimitive *yacjson_primitive_new_from_boolean(bool boolean) {
-    YacJSONPrimitive *primitive = malloc(sizeof(YacJSONPrimitive));
-    assert(primitive != NULL);
-    primitive->type = YACJSON_BOOLEAN;
-    primitive->data.boolean = boolean;
-    return primitive;
+static YacJSONValue *yacjson_value_from_integer(int integer) {
+    YacJSONValue *value = malloc(sizeof(YacJSONValue));
+    assert(value != NULL);
+    value->type = YACJSON_INTEGER;
+    value->data.integer = integer;
+    return value;
 }
 
-static YacJSONPrimitive *yacjson_primitive_new_from_integer(int integer) {
-    YacJSONPrimitive *primitive = malloc(sizeof(YacJSONPrimitive));
-    assert(primitive != NULL);
-    primitive->type = YACJSON_INTEGER;
-    primitive->data.integer = integer;
-    return primitive;
+static YacJSONValue *yacjson_value_from_decimal(double decimal) {
+    YacJSONValue *value = malloc(sizeof(YacJSONValue));
+    assert(value != NULL);
+    value->type = YACJSON_DECIMAL;
+    value->data.decimal = decimal;
+    return value;
 }
 
-static YacJSONPrimitive *yacjson_primitive_new_from_decimal(double decimal) {
-    YacJSONPrimitive *primitive = malloc(sizeof(YacJSONPrimitive));
-    assert(primitive != NULL);
-    primitive->type = YACJSON_DECIMAL;
-    primitive->data.decimal = decimal;
-    return primitive;
-}
-
-static YacJSONPrimitive *yacjson_primitive_new_from_string(char *string) {
-    YacJSONPrimitive *primitive = malloc(sizeof(YacJSONPrimitive));
-    assert(primitive != NULL);
-    primitive->type = YACJSON_STRING;
-    primitive->data.string = malloc((strlen(string) + 1) * sizeof(char));
-    assert(primitive->data.string != NULL);
-    strcpy(primitive->data.string, string);
-    return primitive;
+static YacJSONValue *yacjson_value_from_string(char *string) {
+    YacJSONValue *value = malloc(sizeof(YacJSONValue));
+    assert(value != NULL);
+    value->type = YACJSON_STRING;
+    value->data.string = malloc((strlen(string) + 1) * sizeof(char));
+    assert(value->data.string != NULL);
+    strcpy(value->data.string, string);
+    return value;
 }
 
 int yacjson_object_size(YacJSONObject *object) {
@@ -243,59 +195,51 @@ void yacjson_array_add(YacJSONArray *array, YacJSONValue *value) {
 }
 
 void yacjson_object_add_object(YacJSONObject *object, char *key, YacJSONObject *value_object) {
-    yacjson_object_add(object, key, yacjson_value_new_from_object(value_object));
+    yacjson_object_add(object, key, yacjson_value_from_object(value_object));
 }
 
 void yacjson_object_add_array(YacJSONObject *object, char *key, YacJSONArray *value_array) {
-    yacjson_object_add(object, key, yacjson_value_new_from_array(value_array));
-}
-
-void yacjson_object_add_primitive(YacJSONObject *object, char *key, YacJSONPrimitive *value_primitive) {
-    yacjson_object_add(object, key, yacjson_value_new_from_primitive(value_primitive));
+    yacjson_object_add(object, key, yacjson_value_from_array(value_array));
 }
 
 void yacjson_object_add_boolean(YacJSONObject *object, char *key, bool value_boolean) {
-    yacjson_object_add(object, key, yacjson_value_new_from_primitive(yacjson_primitive_new_from_boolean(value_boolean)));
+    yacjson_object_add(object, key, yacjson_value_from_boolean(value_boolean));
 }
 
 void yacjson_object_add_integer(YacJSONObject *object, char *key, int value_integer) {
-    yacjson_object_add(object, key, yacjson_value_new_from_primitive(yacjson_primitive_new_from_integer(value_integer)));
+    yacjson_object_add(object, key, yacjson_value_from_integer(value_integer));
 }
 
 void yacjson_object_add_decimal(YacJSONObject *object, char *key, double value_decimal) {
-    yacjson_object_add(object, key, yacjson_value_new_from_primitive(yacjson_primitive_new_from_decimal(value_decimal)));
+    yacjson_object_add(object, key, yacjson_value_from_decimal(value_decimal));
 }
 
 void yacjson_object_add_string(YacJSONObject *object, char *key, char *value_string) {
-    yacjson_object_add(object, key, yacjson_value_new_from_primitive(yacjson_primitive_new_from_string(value_string)));
+    yacjson_object_add(object, key, yacjson_value_from_string(value_string));
 }
 
 void yacjson_array_add_object(YacJSONArray *array, YacJSONObject *value_object) {
-    yacjson_array_add(array, yacjson_value_new_from_object(value_object));
+    yacjson_array_add(array, yacjson_value_from_object(value_object));
 }
 
 void yacjson_array_add_array(YacJSONArray *array, YacJSONArray *value_array) {
-    yacjson_array_add(array, yacjson_value_new_from_array(value_array));
-}
-
-void yacjson_array_add_primitive(YacJSONArray *array, YacJSONPrimitive *value_primitive) {
-    yacjson_array_add(array, yacjson_value_new_from_primitive(value_primitive));
+    yacjson_array_add(array, yacjson_value_from_array(value_array));
 }
 
 void yacjson_array_add_boolean(YacJSONArray *array, bool value_boolean) {
-    yacjson_array_add(array, yacjson_value_new_from_primitive(yacjson_primitive_new_from_boolean(value_boolean)));
+    yacjson_array_add(array, yacjson_value_from_boolean(value_boolean));
 }
 
 void yacjson_array_add_integer(YacJSONArray *array, int value_integer) {
-    yacjson_array_add(array, yacjson_value_new_from_primitive(yacjson_primitive_new_from_integer(value_integer)));
+    yacjson_array_add(array, yacjson_value_from_integer(value_integer));
 }
 
 void yacjson_array_add_decimal(YacJSONArray *array, double value_decimal) {
-    yacjson_array_add(array, yacjson_value_new_from_primitive(yacjson_primitive_new_from_decimal(value_decimal)));
+    yacjson_array_add(array, yacjson_value_from_decimal(value_decimal));
 }
 
 void yacjson_array_add_string(YacJSONArray *array, char *value_string) {
-    yacjson_array_add(array, yacjson_value_new_from_primitive(yacjson_primitive_new_from_string(value_string)));
+    yacjson_array_add(array, yacjson_value_from_string(value_string));
 }
 
 YacJSONValue *yacjson_object_get(YacJSONObject *object, const char *key) {
@@ -312,10 +256,6 @@ YacJSONObject *yacjson_object_get_object(YacJSONObject *object, const char *key)
 
 YacJSONArray *yacjson_object_get_array(YacJSONObject *object, const char *key) {
     return yacjson_value_to_array(yacjson_object_get(object, key));
-}
-
-YacJSONPrimitive *yacjson_object_get_primitive(YacJSONObject *object, const char *key) {
-    return yacjson_value_to_primitive(yacjson_object_get(object, key));
 }
 
 bool yacjson_object_get_boolean(YacJSONObject *object, const char *key) {
@@ -342,10 +282,6 @@ YacJSONArray *yacjson_array_get_array(YacJSONArray *array, int index) {
     return yacjson_value_to_array(yacjson_array_get(array, index));
 }
 
-YacJSONPrimitive *yacjson_array_get_primitive(YacJSONArray *array, int index) {
-    return yacjson_value_to_primitive(yacjson_array_get(array, index));
-}
-
 bool yacjson_array_get_boolean(YacJSONArray *array, int index) {
     return yacjson_value_to_boolean(yacjson_array_get(array, index));
 }
@@ -362,25 +298,25 @@ char *yacjson_array_get_string(YacJSONArray *array, int index) {
     return yacjson_value_to_string(yacjson_array_get(array, index));
 }
 
-static YacJSONPrimitive *yacjson_parse_primitive_from_string(char *value_string) {
+static YacJSONValue *yacjson_parse_primitive_from_string(char *value_string) {
     double value_decimal;
     int value_integer;
     if (!strcmp(value_string, "true") || !strcmp(value_string, "false")) {
         bool value_boolean = !strcmp(value_string, "true") ? true : false;
-        return yacjson_primitive_new_from_boolean(value_boolean);
+        return yacjson_value_from_boolean(value_boolean);
     } else if (sscanf(value_string, "%d", &value_integer) == 1) {
-        return yacjson_primitive_new_from_integer(value_integer);
+        return yacjson_value_from_integer(value_integer);
     } else if (sscanf(value_string, "%lf", &value_decimal) == 1){
-        return yacjson_primitive_new_from_decimal(value_decimal);
+        return yacjson_value_from_decimal(value_decimal);
     } else {
-        return yacjson_primitive_new_from_string(strtok(value_string, "\""));
+        return yacjson_value_from_string(strtok(value_string, "\""));
     }
 }
 
-static YacJSONObject *yacjson_parse_object_from_file(FILE *file);
-static YacJSONArray *yacjson_parse_array_from_file(FILE *file);
+static YacJSONValue *yacjson_parse_object_from_file(FILE *file);
+static YacJSONValue *yacjson_parse_array_from_file(FILE *file);
 
-static YacJSONObject *yacjson_parse_object_from_file(FILE *file) {
+static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
     YacJSONObject *object = yacjson_object_new();
     int pos = 0;
     char prev, curr;
@@ -390,7 +326,7 @@ static YacJSONObject *yacjson_parse_object_from_file(FILE *file) {
     bool in_string = false;
     bool in_comment = false;
     bool is_value_added = false;
-    while ((curr = fgetc(file)) != EOF) {
+    while ((curr = (char) fgetc(file)) != EOF) {
         if (curr == '\t') continue;
         if (curr == '\n') { in_comment = false; continue; }
         if (curr == '/' && prev == '/') { in_comment = true; continue; }
@@ -404,19 +340,19 @@ static YacJSONObject *yacjson_parse_object_from_file(FILE *file) {
             continue;
         }
         if (curr == '{' && !in_string && in_value){
-            yacjson_object_add_object(object, key, yacjson_parse_object_from_file(file));
+            yacjson_object_add(object, key, yacjson_parse_object_from_file(file));
             pos = 0; is_value_added = true;
             continue;
         }
         if (curr == '[' && !in_string && in_value) {
-            yacjson_object_add_array(object, key, yacjson_parse_array_from_file(file));
+            yacjson_object_add(object, key, yacjson_parse_array_from_file(file));
             pos = 0; is_value_added = true;
             continue;
         }
         if ((curr == ',' || curr == '}') && !in_string && in_value) {
             if (!is_value_added) {
                 buffer[pos] = '\0';
-                yacjson_object_add_primitive(object, key, yacjson_parse_primitive_from_string(buffer));
+                yacjson_object_add(object, key, yacjson_parse_primitive_from_string(buffer));
                 pos = 0; in_value = false;
             }
             if (curr == ',') continue;
@@ -425,10 +361,10 @@ static YacJSONObject *yacjson_parse_object_from_file(FILE *file) {
         buffer[pos++] = curr;
         prev = curr;
     }
-    return object;
+    return yacjson_value_from_object(object);
 }
 
-static YacJSONArray *yacjson_parse_array_from_file(FILE *file) {
+static YacJSONValue *yacjson_parse_array_from_file(FILE *file) {
     YacJSONArray *array = yacjson_array_new();
     int pos = 0;
     char prev, curr;
@@ -436,7 +372,7 @@ static YacJSONArray *yacjson_parse_array_from_file(FILE *file) {
     bool in_string = false;
     bool in_comment = false;
     bool is_value_added = false;
-    while ((curr = fgetc(file)) != EOF) {
+    while ((curr = (char) fgetc(file)) != EOF) {
         if (curr == '\t') continue;
         if (curr == '\n') { in_comment = false; continue; }
         if (curr == '/' && prev == '/') { in_comment = true; continue; }
@@ -444,19 +380,19 @@ static YacJSONArray *yacjson_parse_array_from_file(FILE *file) {
         if (curr == '"') in_string = !in_string || prev == '\\';
         if (curr == ' ' && !in_string) continue; 
         if (curr == '{' && !in_string){
-            yacjson_array_add_object(array, yacjson_parse_object_from_file(file));
+            yacjson_array_add(array, yacjson_parse_object_from_file(file));
             pos = 0; is_value_added = true;
             continue;
         }
         if (curr == '[' && !in_string) {
-            yacjson_array_add_array(array, yacjson_parse_array_from_file(file));
+            yacjson_array_add(array, yacjson_parse_array_from_file(file));
             pos = 0; is_value_added = true;
             continue;
         }
         if ((curr == ',' || curr == ']') && !in_string) {
             if (!is_value_added) {
                 buffer[pos] = '\0';
-                yacjson_array_add_primitive(array, yacjson_parse_primitive_from_string(buffer));
+                yacjson_array_add(array, yacjson_parse_primitive_from_string(buffer));
                 pos = 0;
             }
             if (curr == ',') continue;
@@ -466,46 +402,39 @@ static YacJSONArray *yacjson_parse_array_from_file(FILE *file) {
         buffer[pos++] = curr;
         prev = curr;
     }
-    return array;
+    return yacjson_value_from_array(array);
 }
 
 YacJSONValue *yacjson_parse(const char *filepath) {
+    YacJSONValue *value = NULL;
     FILE *file = fopen(filepath, "r");
     assert(file != NULL);
     char prev, curr;
     bool in_comment = false;
-    while ((curr = fgetc(file)) != EOF) {
+    while ((curr = (char) fgetc(file)) != EOF) {
         if (curr == '\n') in_comment = false;
         if (prev == '/' && curr == '/') in_comment = true;
         if (in_comment) continue;
-        if (curr == '{') {
-            // Top level is object
-            YacJSONObject *object = yacjson_parse_object_from_file(file); fclose(file);
-            return yacjson_value_new_from_object(object);
-        }
-        if (curr == '[') {
-            // Top level is array
-            YacJSONArray *array = yacjson_parse_array_from_file(file); fclose(file);
-            return yacjson_value_new_from_array(array);
-        }
+        // Top level is object
+        if (curr == '{') value = yacjson_parse_object_from_file(file);
+        // Top level is array
+        if (curr == '[') value = yacjson_parse_array_from_file(file);
         prev = curr;
     }
-    return NULL;
+    return value;
 }
 
 static void yacjson_serialize_to_file(YacJSONValue *value, FILE *file, int depth) {
-    if (yacjson_value_is_primitive(value)) {
-        if (yacjson_value_is_boolean(value)) {
-            fprintf(file, "%s", yacjson_value_to_boolean(value) ? "true" : "false");
-        } else if (yacjson_value_is_integer(value)) {
-            fprintf(file, "%d", yacjson_value_to_integer(value));
-        } else if (yacjson_value_is_decimal(value)) {
-            fprintf(file, "%lf", yacjson_value_to_decimal(value));
-        } else if (yacjson_value_is_string(value)) {
-            fputc('"', file);
-            fputs(yacjson_value_to_string(value), file);
-            fputc('"', file);
-        }
+    if (yacjson_value_is_boolean(value)) {
+        fprintf(file, "%s", yacjson_value_to_boolean(value) ? "true" : "false");
+    } else if (yacjson_value_is_integer(value)) {
+        fprintf(file, "%d", yacjson_value_to_integer(value));
+    } else if (yacjson_value_is_decimal(value)) {
+        fprintf(file, "%lf", yacjson_value_to_decimal(value));
+    } else if (yacjson_value_is_string(value)) {
+        fputc('"', file);
+        fputs(yacjson_value_to_string(value), file);
+        fputc('"', file);
     } else if (yacjson_value_is_object(value)) {
         fputs("{\n", file);
         YacJSONObjectItem *item;
