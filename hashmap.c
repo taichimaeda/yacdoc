@@ -6,19 +6,19 @@
 
 #include "hashmap.h"
 
-#define YACJSON_HASHMAP_INITIAL_CAPACITY (64)
+#define YACDOC_HASHMAP_INITIAL_CAPACITY (64)
 
-YacJSONHashMap *yacjson_hashmap_new() {
-    YacJSONHashMap *map = malloc(sizeof(YacJSONHashMap));
+YacDocHashMap *yacdoc_hashmap_new() {
+    YacDocHashMap *map = malloc(sizeof(YacDocHashMap));
     assert(map != NULL);
-    map->capacity = YACJSON_HASHMAP_INITIAL_CAPACITY;
+    map->capacity = YACDOC_HASHMAP_INITIAL_CAPACITY;
     map->size = 0;
-    map->items = calloc(map->capacity, sizeof(YacJSONHashMapItem *));
+    map->items = calloc(map->capacity, sizeof(YacDocHashMapItem *));
     assert(map->items != NULL);
     return map;
 }
 
-void yacjson_hashmap_free(YacJSONHashMap *map, YacJSONHashMapValueFreeFunc free_func) {
+void yacdoc_hashmap_free(YacDocHashMap *map, YacDocHashMapValueFreeFunc free_func) {
     for (int i = 0; i < map->size; i++) {
         if (map->items[i] == NULL) continue;
         free(map->items[i]->key);
@@ -29,11 +29,11 @@ void yacjson_hashmap_free(YacJSONHashMap *map, YacJSONHashMapValueFreeFunc free_
     free(map);
 }
 
-static int yacjson_positive_mod(int value, int mod) {
+static int yacdoc_positive_mod(int value, int mod) {
     return (value % mod + mod) % mod;
 }
 
-static int yacjson_djb2_hash(const char *str) {
+static int yacdoc_djb2_hash(const char *str) {
     int hash = 5381;
     char *ch_ptr = (char *) str;
     while (*ch_ptr != '\0') {
@@ -43,22 +43,22 @@ static int yacjson_djb2_hash(const char *str) {
     return hash;
 }
 
-static void yacjson_hashmap_resize(YacJSONHashMap *map) {
-    YacJSONHashMapItem **old_items = map->items;
+static void yacdoc_hashmap_resize(YacDocHashMap *map) {
+    YacDocHashMapItem **old_items = map->items;
     map->capacity *= 2;
-    map->items = calloc(map->capacity, sizeof(YacJSONHashMap *));
+    map->items = calloc(map->capacity, sizeof(YacDocHashMap *));
     assert(map->items != NULL);
     for (int i = 0; i < map->size; i++) {
-        yacjson_hashmap_add(map, old_items[i]->key, old_items[i]->value);
+        yacdoc_hashmap_add(map, old_items[i]->key, old_items[i]->value);
     }
 }
 
-bool yacjson_hashmap_add(YacJSONHashMap *map, const char* key, void *value) {
+bool yacdoc_hashmap_add(YacDocHashMap *map, const char* key, void *value) {
     if (map->size == map->capacity) {
-        yacjson_hashmap_resize(map);
+        yacdoc_hashmap_resize(map);
     }
-    int hash = yacjson_djb2_hash(key);
-    int index = yacjson_positive_mod(hash, map->capacity);
+    int hash = yacdoc_djb2_hash(key);
+    int index = yacdoc_positive_mod(hash, map->capacity);
     while (map->items[index] != NULL) {
         if (!strcmp(map->items[index]->key, key)) {
             return false;
@@ -66,7 +66,7 @@ bool yacjson_hashmap_add(YacJSONHashMap *map, const char* key, void *value) {
         index++;
         index %= map->capacity;
     }
-    YacJSONHashMapItem *item = malloc(sizeof(YacJSONHashMapItem));
+    YacDocHashMapItem *item = malloc(sizeof(YacDocHashMapItem));
     assert(item != NULL);
     item->key = malloc((strlen(key) + 1) * sizeof(char));
     assert(item->key != NULL);
@@ -77,9 +77,9 @@ bool yacjson_hashmap_add(YacJSONHashMap *map, const char* key, void *value) {
     return true;
 }
 
-void *yacjson_hashmap_get(YacJSONHashMap *map, const char* key) {
-    int hash = yacjson_djb2_hash(key);
-    int index = yacjson_positive_mod(hash, map->capacity);
+void *yacdoc_hashmap_get(YacDocHashMap *map, const char* key) {
+    int hash = yacdoc_djb2_hash(key);
+    int index = yacdoc_positive_mod(hash, map->capacity);
     int count = 0;
     while (map->items[index] != NULL && count < map->capacity) {
         if (!strcmp(map->items[index]->key ,key)) {
@@ -92,8 +92,8 @@ void *yacjson_hashmap_get(YacJSONHashMap *map, const char* key) {
     return NULL;
 }
 
-YacJSONHashMapIterator *yacjson_hashmap_iterator_new(YacJSONHashMap *map) {
-    YacJSONHashMapIterator *it = malloc(sizeof(YacJSONHashMapIterator));
+YacDocHashMapIterator *yacdoc_hashmap_iterator_new(YacDocHashMap *map) {
+    YacDocHashMapIterator *it = malloc(sizeof(YacDocHashMapIterator));
     assert(it != NULL);
     it->count = 0;
     it->last = -1;
@@ -101,12 +101,12 @@ YacJSONHashMapIterator *yacjson_hashmap_iterator_new(YacJSONHashMap *map) {
     return it;
 }
 
-void yacjson_hashmap_iterator_free(YacJSONHashMapIterator *it) {
+void yacdoc_hashmap_iterator_free(YacDocHashMapIterator *it) {
     free(it);
 }
 
-YacJSONHashMapItem *yacjson_hashmap_iterator_next(YacJSONHashMapIterator *it) {
-    YacJSONHashMapItem *item;
+YacDocHashMapItem *yacdoc_hashmap_iterator_next(YacDocHashMapIterator *it) {
+    YacDocHashMapItem *item;
     for (int i = it->last + 1; i < it->map->capacity; i++) {
         if ((item = it->map->items[i]) != NULL) {
             it->count++;
@@ -117,6 +117,6 @@ YacJSONHashMapItem *yacjson_hashmap_iterator_next(YacJSONHashMapIterator *it) {
     return NULL;
 }
 
-int yacjson_hashmap_iterator_count(YacJSONHashMapIterator *it) {
+int yacdoc_hashmap_iterator_count(YacDocHashMapIterator *it) {
     return it->count;
 }

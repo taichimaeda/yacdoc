@@ -6,13 +6,13 @@
 #include "arraylist.h"
 #include "hashmap.h"
 
-typedef YacJSONHashMap YacJSONObject;
-typedef YacJSONArrayList YacJSONArray;
+typedef YacDocHashMap YacJSONObject;
+typedef YacDocArrayList YacJSONArray;
 
-typedef YacJSONHashMapIterator YacJSONObjectIterator;
-typedef YacJSONArrayListIterator YacJSONArrayIterator;
-typedef YacJSONHashMapItem YacJSONObjectItem;
-typedef YacJSONArrayListItem YacJSONArrayItem;
+typedef YacDocHashMapIterator YacJSONObjectIterator;
+typedef YacDocArrayListIterator YacJSONArrayIterator;
+typedef YacDocHashMapItem YacJSONObjectItem;
+typedef YacDocArrayListItem YacJSONArrayItem;
 
 typedef struct {
     enum {

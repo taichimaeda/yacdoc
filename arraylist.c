@@ -3,19 +3,19 @@
 
 #include "arraylist.h"
 
-#define YACJSON_ARRAYLIST_INITIAL_CAPACITY (64)
+#define YACDOC_ARRAYLIST_INITIAL_CAPACITY (64)
 
-YacJSONArrayList *yacjson_arraylist_new() {
-    YacJSONArrayList *list = malloc(sizeof(YacJSONArrayList));
+YacDocArrayList *yacdoc_arraylist_new() {
+    YacDocArrayList *list = malloc(sizeof(YacDocArrayList));
     assert(list != NULL);
-    list->capacity = YACJSON_ARRAYLIST_INITIAL_CAPACITY;
+    list->capacity = YACDOC_ARRAYLIST_INITIAL_CAPACITY;
     list->size = 0;
-    list->items = calloc(list->capacity, sizeof(YacJSONArrayListItem *));
+    list->items = calloc(list->capacity, sizeof(YacDocArrayListItem *));
     assert(list->items != NULL);
     return list;
 }
 
-void yacjson_arraylist_free(YacJSONArrayList *list, YacJSONArrayListValueFreeFunc free_func) {
+void yacdoc_arraylist_free(YacDocArrayList *list, YacDocArrayListValueFreeFunc free_func) {
     for (int i = 0; i < list->capacity; i++) {
         if (list->items[i] == NULL) continue;
         free_func(list->items[i]->value);
@@ -24,32 +24,32 @@ void yacjson_arraylist_free(YacJSONArrayList *list, YacJSONArrayListValueFreeFun
     free(list);
 }
 
-static void yacjson_list_resize(YacJSONArrayList *list) {
+static void yacdoc_list_resize(YacDocArrayList *list) {
     list->capacity *= 2;
-    list->items = realloc(list->items, list->capacity * sizeof(YacJSONArrayListItem *));
+    list->items = realloc(list->items, list->capacity * sizeof(YacDocArrayListItem *));
     assert(list->items != NULL);
 }
 
-void yacjson_arraylist_add(YacJSONArrayList *list, void *value) {
+void yacdoc_arraylist_add(YacDocArrayList *list, void *value) {
     if (list->size == list->capacity) {
-        yacjson_list_resize(list);
+        yacdoc_list_resize(list);
     }
-    YacJSONArrayListItem *item = malloc(sizeof(YacJSONArrayListItem));
+    YacDocArrayListItem *item = malloc(sizeof(YacDocArrayListItem));
     assert(item != NULL);
     item->value = value;
     list->items[list->size] = item;
     list->size++;
 }
 
-void *yacjson_arraylist_get(YacJSONArrayList *list, int index) {
+void *yacdoc_arraylist_get(YacDocArrayList *list, int index) {
     if (list->items[index] != NULL) {
         return list->items[index]->value;    
     }
     return NULL;
 }
 
-YacJSONArrayListIterator *yacjson_arraylist_iterator_new(YacJSONArrayList *list) {
-    YacJSONArrayListIterator *it = malloc(sizeof(YacJSONArrayListIterator));
+YacDocArrayListIterator *yacdoc_arraylist_iterator_new(YacDocArrayList *list) {
+    YacDocArrayListIterator *it = malloc(sizeof(YacDocArrayListIterator));
     assert(it != NULL);
     it->count = 0;
     it->last = -1;
@@ -57,11 +57,11 @@ YacJSONArrayListIterator *yacjson_arraylist_iterator_new(YacJSONArrayList *list)
     return it;
 }
 
-void yacjson_arraylist_iterator_free(YacJSONArrayListIterator *it) {
+void yacdoc_arraylist_iterator_free(YacDocArrayListIterator *it) {
     free(it);
 }
 
-YacJSONArrayListItem *yacjson_arraylist_iterator_next(YacJSONArrayListIterator *it) {
+YacDocArrayListItem *yacdoc_arraylist_iterator_next(YacDocArrayListIterator *it) {
     if (it->last == it->list->size - 1) {
         return NULL;
     }
@@ -70,6 +70,6 @@ YacJSONArrayListItem *yacjson_arraylist_iterator_next(YacJSONArrayListIterator *
     return it->list->items[it->last];
 }
 
-int yacjson_arraylist_iterator_count(YacJSONArrayListIterator *it) {
+int yacdoc_arraylist_iterator_count(YacDocArrayListIterator *it) {
     return it->count;
 }

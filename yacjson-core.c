@@ -9,11 +9,11 @@
 #define YACJSON_MAX_BUFFER_LEN (256)
 
 YacJSONObject *yacjson_object_new() {
-    return yacjson_hashmap_new();
+    return yacdoc_hashmap_new();
 }
 
 YacJSONArray *yacjson_array_new() {
-    return yacjson_arraylist_new();
+    return yacdoc_arraylist_new();
 }
 
 // TODO
@@ -24,9 +24,9 @@ static void yacjson_value_free(void *value) {
         }
         free(yacjson_value_to_primitive(value));
     } else if (yacjson_value_is_object(value)) {
-        yacjson_hashmap_free(yacjson_value_to_object(value), yacjson_value_free);
+        yacdoc_hashmap_free(yacjson_value_to_object(value), yacjson_value_free);
     } else if (yacjson_value_is_array(value)) {
-        yacjson_arraylist_free(yacjson_value_to_array(value), yacjson_value_free);
+        yacdoc_arraylist_free(yacjson_value_to_array(value), yacjson_value_free);
     }
 }
 
@@ -39,27 +39,27 @@ void yacjson_array_free(YacJSONArray *array) {
 }
 
 YacJSONObjectIterator *yacjson_object_iterator_new(YacJSONObject *object) {
-    return yacjson_hashmap_iterator_new(object);
+    return yacdoc_hashmap_iterator_new(object);
 }
 
 YacJSONArrayIterator *yacjson_array_iterator_new(YacJSONArray *array) {
-    return yacjson_arraylist_iterator_new(array);
+    return yacdoc_arraylist_iterator_new(array);
 }
 
 void yacjson_object_iterator_free(YacJSONObjectIterator *it) {
-    yacjson_hashmap_iterator_free(it);
+    yacdoc_hashmap_iterator_free(it);
 }
 
 void yacjson_array_iterator_free(YacJSONArrayIterator *it) {
-    yacjson_arraylist_iterator_free(it);
+    yacdoc_arraylist_iterator_free(it);
 }
 
 YacJSONObjectItem *yacjson_object_iterator_next(YacJSONObjectIterator *it) {
-    return yacjson_hashmap_iterator_next(it);
+    return yacdoc_hashmap_iterator_next(it);
 }
 
 YacJSONArrayItem *yacjson_array_iterator_next(YacJSONArrayIterator *it) {
-    return yacjson_arraylist_iterator_next(it);
+    return yacdoc_arraylist_iterator_next(it);
 }
 
 char *yacjson_object_item_key(YacJSONObjectItem *item) {
@@ -75,11 +75,11 @@ YacJSONValue *yacjson_array_item_value(YacJSONArrayItem *item) {
 }
 
 int yacjson_object_iterator_count(YacJSONObjectIterator *it) {
-    return yacjson_hashmap_iterator_count(it);
+    return yacdoc_hashmap_iterator_count(it);
 }
 
 int yacjson_array_iterator_count(YacJSONArrayIterator *it) {
-    return yacjson_arraylist_iterator_count(it);
+    return yacdoc_arraylist_iterator_count(it);
 }
 
 bool yacjson_value_is_object(YacJSONValue *value) {
@@ -234,11 +234,11 @@ int yacjson_array_size(YacJSONArray *array) {
 }
 
 void yacjson_object_add(YacJSONObject *object, char *key, YacJSONValue *value) {
-    yacjson_hashmap_add(object, key, (void *) value);
+    yacdoc_hashmap_add(object, key, (void *) value);
 }
 
 void yacjson_array_add(YacJSONArray *array, YacJSONValue *value) {
-    yacjson_arraylist_add(array, (void *) value);
+    yacdoc_arraylist_add(array, (void *) value);
 }
 
 void yacjson_object_add_object(YacJSONObject *object, char *key, YacJSONObject *value_object) {
@@ -298,11 +298,11 @@ void yacjson_array_add_string(YacJSONArray *array, char *value_string) {
 }
 
 YacJSONValue *yacjson_object_get(YacJSONObject *object, const char *key) {
-    return yacjson_hashmap_get(object, key);
+    return yacdoc_hashmap_get(object, key);
 }
 
 YacJSONValue *yacjson_array_get(YacJSONArray *array, int index) {
-    return yacjson_arraylist_get(array, index);
+    return yacdoc_arraylist_get(array, index);
 }
 
 YacJSONObject *yacjson_object_get_object(YacJSONObject *object, const char *key) {

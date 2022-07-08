@@ -1,32 +1,32 @@
-#ifndef YACJSON_HASHMAP_H
-#define YACJSON_HASHMAP_H
+#ifndef YACDOC_HASHMAP_H
+#define YACDOC_HASHMAP_H
 
 typedef struct {
     char *key;
     void *value;
-} YacJSONHashMapItem;
+} YacDocHashMapItem;
 
 typedef struct {
     int capacity;
     int size;
-    YacJSONHashMapItem **items;
-} YacJSONHashMap;
+    YacDocHashMapItem **items;
+} YacDocHashMap;
 
 typedef struct {
     int count;
     int last;
-    YacJSONHashMap *map;
-} YacJSONHashMapIterator;
+    YacDocHashMap *map;
+} YacDocHashMapIterator;
 
-typedef void (* YacJSONHashMapValueFreeFunc)(void *);
+typedef void (* YacDocHashMapValueFreeFunc)(void *);
 
-YacJSONHashMap *yacjson_hashmap_new();
-void yacjson_hashmap_free(YacJSONHashMap *map, YacJSONHashMapValueFreeFunc free_func);
-bool yacjson_hashmap_add(YacJSONHashMap *map, const char* key, void *value);
-void *yacjson_hashmap_get(YacJSONHashMap *map, const char* key);
-YacJSONHashMapIterator *yacjson_hashmap_iterator_new(YacJSONHashMap *map);
-void yacjson_hashmap_iterator_free(YacJSONHashMapIterator *it);
-YacJSONHashMapItem *yacjson_hashmap_iterator_next(YacJSONHashMapIterator *it);
-int yacjson_hashmap_iterator_count(YacJSONHashMapIterator *it);
+YacDocHashMap *yacdoc_hashmap_new();
+void yacdoc_hashmap_free(YacDocHashMap *map, YacDocHashMapValueFreeFunc free_func);
+bool yacdoc_hashmap_add(YacDocHashMap *map, const char* key, void *value);
+void *yacdoc_hashmap_get(YacDocHashMap *map, const char* key);
+YacDocHashMapIterator *yacdoc_hashmap_iterator_new(YacDocHashMap *map);
+void yacdoc_hashmap_iterator_free(YacDocHashMapIterator *it);
+YacDocHashMapItem *yacdoc_hashmap_iterator_next(YacDocHashMapIterator *it);
+int yacdoc_hashmap_iterator_count(YacDocHashMapIterator *it);
 
 #endif

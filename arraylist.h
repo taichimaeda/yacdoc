@@ -1,33 +1,33 @@
-#ifndef YACJSON_ARRAYLIST_H
-#define YACJSON_ARRAYLIST_H
+#ifndef YACDOC_ARRAYLIST_H
+#define YACDOC_ARRAYLIST_H
 
 #include <stdbool.h>
 
 typedef struct {
     void *value;
-} YacJSONArrayListItem;
+} YacDocArrayListItem;
 
 typedef struct {
     int capacity;
     int size;
-    YacJSONArrayListItem **items;
-} YacJSONArrayList;
+    YacDocArrayListItem **items;
+} YacDocArrayList;
 
 typedef struct {
     int count;
     int last;
-    YacJSONArrayList *list;
-} YacJSONArrayListIterator;
+    YacDocArrayList *list;
+} YacDocArrayListIterator;
 
-typedef void (* YacJSONArrayListValueFreeFunc)(void *);
+typedef void (* YacDocArrayListValueFreeFunc)(void *);
 
-YacJSONArrayList *yacjson_arraylist_new();
-void yacjson_arraylist_free(YacJSONArrayList *list, YacJSONArrayListValueFreeFunc free_func);
-void yacjson_arraylist_add(YacJSONArrayList *list, void *value);
-void *yacjson_arraylist_get(YacJSONArrayList *list, int index);
-YacJSONArrayListIterator *yacjson_arraylist_iterator_new(YacJSONArrayList *list);
-void yacjson_arraylist_iterator_free(YacJSONArrayListIterator *it);
-YacJSONArrayListItem *yacjson_arraylist_iterator_next(YacJSONArrayListIterator *it);
-int yacjson_arraylist_iterator_count(YacJSONArrayListIterator *it);
+YacDocArrayList *yacdoc_arraylist_new();
+void yacdoc_arraylist_free(YacDocArrayList *list, YacDocArrayListValueFreeFunc free_func);
+void yacdoc_arraylist_add(YacDocArrayList *list, void *value);
+void *yacdoc_arraylist_get(YacDocArrayList *list, int index);
+YacDocArrayListIterator *yacdoc_arraylist_iterator_new(YacDocArrayList *list);
+void yacdoc_arraylist_iterator_free(YacDocArrayListIterator *it);
+YacDocArrayListItem *yacdoc_arraylist_iterator_next(YacDocArrayListIterator *it);
+int yacdoc_arraylist_iterator_count(YacDocArrayListIterator *it);
 
 #endif
