@@ -3,8 +3,13 @@
 
 #include "hashmap.h"
 
+typedef YacDocHashMapItem YacXMLAttribute;
+typedef YacDocHashMap YacXMLAttributes;
+
 typedef struct {
     char *name;
+    char *content;
+    YacXMLAttributes *attrs;
 } YacXMLElement;
 
 #endif

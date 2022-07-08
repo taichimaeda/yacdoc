@@ -16,10 +16,10 @@ typedef YacDocArrayListItem YacJSONArrayItem;
 
 typedef struct {
     enum {
-        BOOLEAN,
-        INTEGER,
-        DECIMAL,
-        STRING
+        YACJSON_BOOLEAN,
+        YACJSON_INTEGER,
+        YACJSON_DECIMAL,
+        YACJSON_STRING,
     } type;
     union {
         bool boolean;
@@ -31,9 +31,9 @@ typedef struct {
 
 typedef struct {
     enum {
-        OBJECT,
-        ARRAY,
-        PRIMITIVE,
+        YACJSON_OBJECT,
+        YACJSON_ARRAY,
+        YACJSON_PRIMITIVE,
     } type;
     union {
         YacJSONObject *object;

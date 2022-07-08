@@ -23,6 +23,7 @@ static void yacjson_value_free(void *value) {
             free(yacjson_value_to_string(value));
         }
         free(yacjson_value_to_primitive(value));
+        free(value);
     } else if (yacjson_value_is_object(value)) {
         yacdoc_hashmap_free(yacjson_value_to_object(value), yacjson_value_free);
     } else if (yacjson_value_is_array(value)) {
@@ -83,47 +84,47 @@ int yacjson_array_iterator_count(YacJSONArrayIterator *it) {
 }
 
 bool yacjson_value_is_object(YacJSONValue *value) {
-    return value->type == OBJECT;
+    return value->type == YACJSON_OBJECT;
 }
 
 bool yacjson_value_is_array(YacJSONValue *value) {
-    return value->type == ARRAY;
+    return value->type == YACJSON_ARRAY;
 }
 
 bool yacjson_value_is_primitive(YacJSONValue *value) {
-    return value->type == PRIMITIVE;
+    return value->type == YACJSON_PRIMITIVE;
 }
 
 bool yacjson_value_is_boolean(YacJSONValue *value) {
-    return yacjson_value_is_primitive(value) && value->data.primitive->type == BOOLEAN;
+    return yacjson_value_is_primitive(value) && value->data.primitive->type == YACJSON_BOOLEAN;
 }
 
 bool yacjson_value_is_integer(YacJSONValue *value) {
-    return yacjson_value_is_primitive(value) && value->data.primitive->type == INTEGER;
+    return yacjson_value_is_primitive(value) && value->data.primitive->type == YACJSON_INTEGER;
 }
 
 bool yacjson_value_is_decimal(YacJSONValue *value) {
-    return yacjson_value_is_primitive(value) && value->data.primitive->type == DECIMAL;
+    return yacjson_value_is_primitive(value) && value->data.primitive->type == YACJSON_DECIMAL;
 }
 
 bool yacjson_value_is_string(YacJSONValue *value) {
-    return yacjson_value_is_primitive(value) && value->data.primitive->type == STRING;
+    return yacjson_value_is_primitive(value) && value->data.primitive->type == YACJSON_STRING;
 }
 
 bool yacjson_primitive_is_boolean(YacJSONPrimitive *primitive) {
-    return primitive->type == BOOLEAN;
+    return primitive->type == YACJSON_BOOLEAN;
 }
 
 bool yacjson_primitive_is_integer(YacJSONPrimitive *primitive) {
-    return primitive->type == INTEGER;
+    return primitive->type == YACJSON_INTEGER;
 }
 
 bool yacjson_primitive_is_decimal(YacJSONPrimitive *primitive) {
-    return primitive->type == DECIMAL;
+    return primitive->type == YACJSON_DECIMAL;
 }
 
 bool yacjson_primitive_is_string(YacJSONPrimitive *primitive) {
-    return primitive->type == STRING;
+    return primitive->type == YACJSON_STRING;
 }
 
 YacJSONObject *yacjson_value_to_object(YacJSONValue *value) {
@@ -172,21 +173,21 @@ char *yacjson_primitive_to_string(YacJSONPrimitive *primitive) {
 
 static YacJSONValue *yacjson_value_new_from_object(YacJSONObject *object) {
     YacJSONValue *value = malloc(sizeof(YacJSONValue));
-    value->type = OBJECT;
+    value->type = YACJSON_OBJECT;
     value->data.object = object;
     return value;
 }
 
 static YacJSONValue *yacjson_value_new_from_array(YacJSONArray *array) {
     YacJSONValue *value = malloc(sizeof(YacJSONValue));
-    value->type = ARRAY;
+    value->type = YACJSON_ARRAY;
     value->data.array = array;
     return value;
 }
 
 static YacJSONValue *yacjson_value_new_from_primitive(YacJSONPrimitive *primitive) {
     YacJSONValue *value = malloc(sizeof(YacJSONValue));
-    value->type = PRIMITIVE;
+    value->type = YACJSON_PRIMITIVE;
     value->data.primitive = primitive;
     return value;
 }
@@ -194,7 +195,7 @@ static YacJSONValue *yacjson_value_new_from_primitive(YacJSONPrimitive *primitiv
 static YacJSONPrimitive *yacjson_primitive_new_from_boolean(bool boolean) {
     YacJSONPrimitive *primitive = malloc(sizeof(YacJSONPrimitive));
     assert(primitive != NULL);
-    primitive->type = BOOLEAN;
+    primitive->type = YACJSON_BOOLEAN;
     primitive->data.boolean = boolean;
     return primitive;
 }
@@ -202,7 +203,7 @@ static YacJSONPrimitive *yacjson_primitive_new_from_boolean(bool boolean) {
 static YacJSONPrimitive *yacjson_primitive_new_from_integer(int integer) {
     YacJSONPrimitive *primitive = malloc(sizeof(YacJSONPrimitive));
     assert(primitive != NULL);
-    primitive->type = INTEGER;
+    primitive->type = YACJSON_INTEGER;
     primitive->data.integer = integer;
     return primitive;
 }
@@ -210,7 +211,7 @@ static YacJSONPrimitive *yacjson_primitive_new_from_integer(int integer) {
 static YacJSONPrimitive *yacjson_primitive_new_from_decimal(double decimal) {
     YacJSONPrimitive *primitive = malloc(sizeof(YacJSONPrimitive));
     assert(primitive != NULL);
-    primitive->type = DECIMAL;
+    primitive->type = YACJSON_DECIMAL;
     primitive->data.decimal = decimal;
     return primitive;
 }
@@ -218,7 +219,7 @@ static YacJSONPrimitive *yacjson_primitive_new_from_decimal(double decimal) {
 static YacJSONPrimitive *yacjson_primitive_new_from_string(char *string) {
     YacJSONPrimitive *primitive = malloc(sizeof(YacJSONPrimitive));
     assert(primitive != NULL);
-    primitive->type = STRING;
+    primitive->type = YACJSON_STRING;
     primitive->data.string = malloc((strlen(string) + 1) * sizeof(char));
     assert(primitive->data.string != NULL);
     strcpy(primitive->data.string, string);
