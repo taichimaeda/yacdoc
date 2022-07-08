@@ -1,0 +1,39 @@
+{
+	"firstname": "Bobinette",
+	"bool": "false",
+	"email from expression": "Bobinette.Dearborn@yopmail.com",
+	"country": "Uruguay",
+	"lastname": "Dearborn",
+	"city": "Paris",
+	"regEx": "hellooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo to you",
+	"date": "1983-01-23",
+	"array": [
+		"Livvyy",
+		"Brena",
+		"Amara",
+		"Cindelyn",
+		"Lonnie"
+	],
+	"array of objects": [
+		{
+			"index": "0",
+			"index start at 5": "5"
+		},
+		{
+			"index": "1",
+			"index start at 5": "6"
+		},
+		{
+			"index": "2",
+			"index start at 5": "7"
+		}
+	],
+	"random": "88",
+	"Blake": {
+		"age": "69"
+	},
+	"email uses current data": "Bobinette.Dearborn@gmail.com",
+	"countryCode": "US",
+	"enum": "online",
+	"random float": "53.886"
+}

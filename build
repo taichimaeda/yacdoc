@@ -1,0 +1,17 @@
+#!/bin/bash
+
+target=yacjson.h
+echo -n > $target
+for file in arraylist.h hashmap.h lib.h; do
+    cat $file >> $target
+    echo "" >> $target
+done
+echo -e "#ifdef YACJSON_IMPLEMENTATION\n" >> $target
+for file in arraylist.c hashmap.c lib.c; do
+    cat $file >> $target
+    echo "" >> $target
+done
+echo "#endif" >> $target
+grep -v -E '#include "arraylist.h"|#include "hashmap.h"|#include "lib.h"' $target > $target.bak
+cat $target.bak > $target
+rm -f $target.bak
