@@ -116,7 +116,7 @@ bool yacjson_value_to_boolean(YacJSONValue *value) {
     return value->data.boolean;
 }
 
-int yacjson_value_to_integer(YacJSONValue *value) {
+long yacjson_value_to_integer(YacJSONValue *value) {
     return value->data.integer;
 }
 
@@ -152,7 +152,7 @@ static YacJSONValue *yacjson_value_from_boolean(bool boolean) {
     return value;
 }
 
-static YacJSONValue *yacjson_value_from_integer(int integer) {
+static YacJSONValue *yacjson_value_from_integer(long integer) {
     YacJSONValue *value = malloc(sizeof(YacJSONValue));
     assert(value != NULL);
     value->type = YACJSON_INTEGER;
@@ -206,7 +206,7 @@ void yacjson_object_add_boolean(YacJSONObject *object, char *key, bool value_boo
     yacjson_object_add(object, key, yacjson_value_from_boolean(value_boolean));
 }
 
-void yacjson_object_add_integer(YacJSONObject *object, char *key, int value_integer) {
+void yacjson_object_add_integer(YacJSONObject *object, char *key, long value_integer) {
     yacjson_object_add(object, key, yacjson_value_from_integer(value_integer));
 }
 
@@ -230,7 +230,7 @@ void yacjson_array_add_boolean(YacJSONArray *array, bool value_boolean) {
     yacjson_array_add(array, yacjson_value_from_boolean(value_boolean));
 }
 
-void yacjson_array_add_integer(YacJSONArray *array, int value_integer) {
+void yacjson_array_add_integer(YacJSONArray *array, long value_integer) {
     yacjson_array_add(array, yacjson_value_from_integer(value_integer));
 }
 
@@ -262,7 +262,7 @@ bool yacjson_object_get_boolean(YacJSONObject *object, const char *key) {
     return yacjson_value_to_boolean(yacjson_object_get(object, key));
 }
 
-int yacjson_object_get_integer(YacJSONObject *object, const char *key) {
+long yacjson_object_get_integer(YacJSONObject *object, const char *key) {
     return yacjson_value_to_integer(yacjson_object_get(object, key));
 }
 
@@ -286,7 +286,7 @@ bool yacjson_array_get_boolean(YacJSONArray *array, int index) {
     return yacjson_value_to_boolean(yacjson_array_get(array, index));
 }
 
-int yacjson_array_get_integer(YacJSONArray *array, int index) {
+long yacjson_array_get_integer(YacJSONArray *array, int index) {
     return yacjson_value_to_integer(yacjson_array_get(array, index));
 }
 
@@ -299,18 +299,14 @@ char *yacjson_array_get_string(YacJSONArray *array, int index) {
 }
 
 static YacJSONValue *yacjson_parse_primitive_from_string(char *value_string) {
-    double value_decimal;
-    int value_integer;
-    if (!strcmp(value_string, "true") || !strcmp(value_string, "false")) {
-        bool value_boolean = !strcmp(value_string, "true") ? true : false;
-        return yacjson_value_from_boolean(value_boolean);
-    } else if (sscanf(value_string, "%d", &value_integer) == 1) {
-        return yacjson_value_from_integer(value_integer);
-    } else if (sscanf(value_string, "%lf", &value_decimal) == 1){
-        return yacjson_value_from_decimal(value_decimal);
-    } else {
-        return yacjson_value_from_string(strtok(value_string, "\""));
-    }
+    if (!strcmp(value_string, "true")) return yacjson_value_from_boolean(true);
+    if (!strcmp(value_string, "false")) return yacjson_value_from_boolean(false);
+    char *end_ptr;
+    long value_integer = strtol(value_string, &end_ptr, 10);
+    if (*end_ptr == '\0') return yacjson_value_from_integer(value_integer);
+    double value_decimal = strtod(value_string, &end_ptr);
+    if (*end_ptr == '\0') return yacjson_value_from_decimal(value_decimal);
+    return yacjson_value_from_string(strtok(value_string, "\""));
 }
 
 static YacJSONValue *yacjson_parse_object_from_file(FILE *file);
@@ -428,7 +424,7 @@ static void yacjson_serialize_to_file(YacJSONValue *value, FILE *file, int depth
     if (yacjson_value_is_boolean(value)) {
         fprintf(file, "%s", yacjson_value_to_boolean(value) ? "true" : "false");
     } else if (yacjson_value_is_integer(value)) {
-        fprintf(file, "%d", yacjson_value_to_integer(value));
+        fprintf(file, "%ld", yacjson_value_to_integer(value));
     } else if (yacjson_value_is_decimal(value)) {
         fprintf(file, "%lf", yacjson_value_to_decimal(value));
     } else if (yacjson_value_is_string(value)) {
