@@ -310,18 +310,18 @@ static YacJSONValue *yacjson_parse_array_from_file(FILE *file);
 static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
     YacJSONObject *object = yacjson_object_new();
     int pos = 0;
-    char prev, curr;
+    int prev, curr;
     char buffer[YACJSON_MAX_BUFFER_LEN];
     char key[YACJSON_MAX_BUFFER_LEN];
     bool in_value = false;
     bool in_string = false;
     bool in_comment = false;
     bool is_value_added = false;
-    while ((curr = (char) fgetc(file)) != EOF) {
-        if (curr == '\t') continue;
-        if (curr == '\n') { in_comment = false; continue; }
-        if (curr == '/' && prev == '/') { in_comment = true; continue; }
+    while ((curr = fgetc(file)) != EOF) {
         if (in_comment) continue;
+        if (curr == '/' && prev == '/') in_comment = true;
+        if (curr == '\n') in_comment = false;
+        if (curr == '\t' || curr == '\n') continue;
         if (curr == '"') in_string = !in_string || prev == '\\';
         if (curr == ' ' && !in_string) continue; 
         if (curr == ':' && !in_string) {
@@ -349,7 +349,7 @@ static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
             if (curr == ',') continue;
             if (curr == '}') break;
         }
-        buffer[pos++] = curr;
+        buffer[pos++] = (char) curr;
         prev = curr;
     }
     return yacjson_value_from_object(object);
@@ -358,16 +358,16 @@ static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
 static YacJSONValue *yacjson_parse_array_from_file(FILE *file) {
     YacJSONArray *array = yacjson_array_new();
     int pos = 0;
-    char prev, curr;
+    int prev, curr;
     char buffer[YACJSON_MAX_BUFFER_LEN];
     bool in_string = false;
     bool in_comment = false;
     bool is_value_added = false;
-    while ((curr = (char) fgetc(file)) != EOF) {
-        if (curr == '\t') continue;
-        if (curr == '\n') { in_comment = false; continue; }
-        if (curr == '/' && prev == '/') { in_comment = true; continue; }
+    while ((curr = fgetc(file)) != EOF) {
         if (in_comment) continue;
+        if (curr == '/' && prev == '/') in_comment = true;
+        if (curr == '\n') in_comment = false;
+        if (curr == '\t' || curr == '\n') continue;
         if (curr == '"') in_string = !in_string || prev == '\\';
         if (curr == ' ' && !in_string) continue; 
         if (curr == '{' && !in_string){
@@ -388,9 +388,8 @@ static YacJSONValue *yacjson_parse_array_from_file(FILE *file) {
             }
             if (curr == ',') continue;
             if (curr == ']') break;
-            break;
         }
-        buffer[pos++] = curr;
+        buffer[pos++] = (char) curr;
         prev = curr;
     }
     return yacjson_value_from_array(array);
@@ -400,12 +399,12 @@ YacJSONValue *yacjson_parse(const char *filepath) {
     YacJSONValue *value = NULL;
     FILE *file = fopen(filepath, "r");
     assert(file != NULL);
-    char prev, curr;
+    int prev, curr;
     bool in_comment = false;
-    while ((curr = (char) fgetc(file)) != EOF) {
-        if (curr == '\n') in_comment = false;
-        if (prev == '/' && curr == '/') in_comment = true;
+    while ((curr = fgetc(file)) != EOF) {
         if (in_comment) continue;
+        if (prev == '/' && curr == '/') in_comment = true;
+        if (curr == '\n') in_comment = false;
         // Top level is object
         if (curr == '{') value = yacjson_parse_object_from_file(file);
         // Top level is array
