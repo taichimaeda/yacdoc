@@ -343,18 +343,19 @@ static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
             pos = 0; is_value_added = true;
             continue;
         }
-        if (curr == ',' && !in_string && is_key_added && is_value_added) continue;
-        if (curr == ',' && !in_string && is_key_added && !is_value_added) {
-            buffer[pos] = '\0';
-            yacjson_object_add(object, key, yacjson_parse_primitive_from_string(buffer));
-            pos = 0; is_key_added = false;
+        if (curr == ',' && !in_string && is_key_added) {
+            if (!is_value_added) {
+                buffer[pos] = '\0';
+                yacjson_object_add(object, key, yacjson_parse_primitive_from_string(buffer));
+            }
+            pos = 0; is_key_added = false; is_value_added = false;
             continue;
         }
-        if (curr == '}' && !in_string && is_key_added && is_value_added) break;
-        if (curr == '}' && !in_string && is_key_added && !is_value_added) {
-            buffer[pos] = '\0';
-            yacjson_object_add(object, key, yacjson_parse_primitive_from_string(buffer));
-            pos = 0; is_key_added = false;
+        if (curr == '}' && !in_string && is_key_added) {
+            if (!is_value_added) {
+                buffer[pos] = '\0';
+                yacjson_object_add(object, key, yacjson_parse_primitive_from_string(buffer));
+            }
             break;
         }
         buffer[pos++] = (char) curr;
@@ -389,18 +390,19 @@ static YacJSONValue *yacjson_parse_array_from_file(FILE *file) {
             pos = 0; is_value_added = true;
             continue;
         }
-        if (curr == ',' && !in_string && is_value_added) continue;
-        if (curr == ',' && !in_string && !is_value_added) {
-            buffer[pos] = '\0';
-            yacjson_array_add(array, yacjson_parse_primitive_from_string(buffer));
-            pos = 0;
+        if (curr == ',' && !in_string) {
+            if (!is_value_added) {
+                buffer[pos] = '\0';
+                yacjson_array_add(array, yacjson_parse_primitive_from_string(buffer));
+            }
+            pos = 0; is_value_added = false;
             continue;
         }
-        if (curr == ']' && !in_string && is_value_added) break;
-        if (curr == ']' && !in_string && !is_value_added) {
-            buffer[pos] = '\0';
-            yacjson_array_add(array, yacjson_parse_primitive_from_string(buffer));
-            pos = 0;
+        if (curr == ']' && !in_string) {
+            if (!is_value_added) {
+                buffer[pos] = '\0';
+                yacjson_array_add(array, yacjson_parse_primitive_from_string(buffer));
+            }
             break;
         }
         buffer[pos++] = (char) curr;
