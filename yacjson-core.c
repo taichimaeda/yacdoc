@@ -312,7 +312,8 @@ static YacJSONValue *yacjson_parse_array_from_file(FILE *file);
 static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
     YacJSONObject *object = yacjson_object_new();
     int pos = 0;
-    int prev, curr;
+    int curr = 0;
+    int prev = 0;
     char buffer[YACJSON_MAX_BUFFER_LEN];
     char key[YACJSON_MAX_BUFFER_LEN];
     bool in_string = false;
@@ -365,7 +366,8 @@ static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
 static YacJSONValue *yacjson_parse_array_from_file(FILE *file) {
     YacJSONArray *array = yacjson_array_new();
     int pos = 0;
-    int prev, curr;
+    int curr = 0;
+    int prev = 0;
     char buffer[YACJSON_MAX_BUFFER_LEN];
     bool in_string = false;
     bool in_comment = false;
