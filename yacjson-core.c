@@ -304,6 +304,8 @@ static YacJSONValue *yacjson_parse_primitive_from_string(char *value_string) {
     return yacjson_value_from_string(strtok(value_string, "\""));
 }
 
+// TODO: Extract logic into get_key and get_value functions
+
 static YacJSONValue *yacjson_parse_object_from_file(FILE *file);
 static YacJSONValue *yacjson_parse_array_from_file(FILE *file);
 
@@ -319,10 +321,10 @@ static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
     bool is_value_added = false;
     while ((curr = fgetc(file)) != EOF) {
         if (in_comment) continue;
-        if (curr == '/' && prev == '/') in_comment = true;
+        if (curr == '"') in_string = !in_string || prev == '\\';
+        if (curr == '/' && prev == '/' && !in_string) in_comment = true;
         if (curr == '\n') in_comment = false;
         if (curr == '\t' || curr == '\n') continue;
-        if (curr == '"') in_string = !in_string || prev == '\\';
         if (curr == ' ' && !in_string) continue; 
         if (curr == ':' && !in_string && !is_key_added) {
             buffer[pos] = '\0';
@@ -370,10 +372,10 @@ static YacJSONValue *yacjson_parse_array_from_file(FILE *file) {
     bool is_value_added = false;
     while ((curr = fgetc(file)) != EOF) {
         if (in_comment) continue;
-        if (curr == '/' && prev == '/') in_comment = true;
+        if (curr == '"') in_string = !in_string || prev == '\\';
+        if (curr == '/' && prev == '/' && !in_string) in_comment = true;
         if (curr == '\n') in_comment = false;
         if (curr == '\t' || curr == '\n') continue;
-        if (curr == '"') in_string = !in_string || prev == '\\';
         if (curr == ' ' && !in_string) continue; 
         if (curr == '{' && !in_string) {
             yacjson_array_add(array, yacjson_parse_object_from_file(file));
