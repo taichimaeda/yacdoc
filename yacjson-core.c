@@ -313,33 +313,33 @@ static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
     int ch;
     static char buffer[YACJSON_MAX_BUFFER_LEN];
     static char key[YACJSON_MAX_BUFFER_LEN];
-    bool in_string = false;
+    bool is_quoted = false;
     bool is_key_added = false;
     bool is_value_added = false;
     while ((ch = fgetc(file)) != EOF) {
         if (ch == '\t' || ch == '\n') continue;
-        if (ch == ' ' && !in_string) continue;
-        if (ch == '"') in_string = !in_string || buffer[pos - 1] == '\\';
-        if (ch == ':' && !in_string && !is_key_added) {
+        if (ch == ' ' && !is_quoted) continue;
+        if (ch == '"') is_quoted = !is_quoted || buffer[pos - 1] == '\\';
+        if (ch == ':' && !is_quoted && !is_key_added) {
             buffer[pos] = '\0';
             strcpy(key, strtok(buffer, "\""));
             pos = 0;
             is_key_added = true;
             continue;
         }
-        if (ch == '{' && !in_string && is_key_added){
+        if (ch == '{' && !is_quoted && is_key_added){
             yacjson_object_add(object, key, yacjson_parse_object_from_file(file));
             pos = 0;
             is_value_added = true;
             continue;
         }
-        if (ch == '[' && !in_string && is_key_added) {
+        if (ch == '[' && !is_quoted && is_key_added) {
             yacjson_object_add(object, key, yacjson_parse_array_from_file(file));
             pos = 0;
             is_value_added = true;
             continue;
         }
-        if (ch == ',' && !in_string && is_key_added) {
+        if (ch == ',' && !is_quoted && is_key_added) {
             if (!is_value_added) {
                 buffer[pos] = '\0';
                 yacjson_object_add(object, key, yacjson_parse_primitive_from_string(buffer));
@@ -349,7 +349,7 @@ static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
             is_value_added = false;
             continue;
         }
-        if (ch == '}' && !in_string && is_key_added) {
+        if (ch == '}' && !is_quoted && is_key_added) {
             if (!is_value_added) {
                 buffer[pos] = '\0';
                 yacjson_object_add(object, key, yacjson_parse_primitive_from_string(buffer));
@@ -366,25 +366,25 @@ static YacJSONValue *yacjson_parse_array_from_file(FILE *file) {
     int pos = 0;
     int ch;
     static char buffer[YACJSON_MAX_BUFFER_LEN];
-    bool in_string = false;
+    bool is_quoted = false;
     bool is_value_added = false;
     while ((ch = fgetc(file)) != EOF) {
         if (ch == '\t' || ch == '\n') continue;
-        if (ch == ' ' && !in_string) continue;
-        if (ch == '"') in_string = !in_string || buffer[pos - 1] == '\\';
-        if (ch == '{' && !in_string) {
+        if (ch == ' ' && !is_quoted) continue;
+        if (ch == '"') is_quoted = !is_quoted || buffer[pos - 1] == '\\';
+        if (ch == '{' && !is_quoted) {
             yacjson_array_add(array, yacjson_parse_object_from_file(file));
             pos = 0;
             is_value_added = true;
             continue;
         }
-        if (ch == '[' && !in_string) {
+        if (ch == '[' && !is_quoted) {
             yacjson_array_add(array, yacjson_parse_array_from_file(file));
             pos = 0;
             is_value_added = true;
             continue;
         }
-        if (ch == ',' && !in_string) {
+        if (ch == ',' && !is_quoted) {
             if (!is_value_added) {
                 buffer[pos] = '\0';
                 yacjson_array_add(array, yacjson_parse_primitive_from_string(buffer));
@@ -393,7 +393,7 @@ static YacJSONValue *yacjson_parse_array_from_file(FILE *file) {
             is_value_added = false;
             continue;
         }
-        if (ch == ']' && !in_string) {
+        if (ch == ']' && !is_quoted) {
             if (!is_value_added) {
                 buffer[pos] = '\0';
                 yacjson_array_add(array, yacjson_parse_primitive_from_string(buffer));
