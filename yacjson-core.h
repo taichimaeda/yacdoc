@@ -65,6 +65,13 @@ long yacjson_value_to_integer(YacJSONValue *value);
 double yacjson_value_to_decimal(YacJSONValue *value);
 char *yacjson_value_to_string(YacJSONValue *value);
 
+YacJSONValue *yacjson_value_from_object(YacJSONObject *object);
+YacJSONValue *yacjson_value_from_array(YacJSONArray *array);
+YacJSONValue *yacjson_value_from_boolean(bool boolean);
+YacJSONValue *yacjson_value_from_integer(long integer);
+YacJSONValue *yacjson_value_from_decimal(double decimal);
+YacJSONValue *yacjson_value_from_string(char *string);
+
 int yacjson_object_size(YacJSONObject *object);
 int yacjson_array_size(YacJSONArray *array);
 
