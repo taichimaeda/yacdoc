@@ -68,7 +68,7 @@ bool yacdoc_hashmap_add(YacDocHashMap *map, const char* key, void *value) {
     }
     YacDocHashMapItem *item = malloc(sizeof(YacDocHashMapItem));
     assert(item != NULL);
-    item->key = malloc((strlen(key) + 1) * sizeof(char));
+    item->key = malloc(strlen(key) + 1);
     assert(item->key != NULL);
     strcpy(item->key, key);
     item->value = value;
