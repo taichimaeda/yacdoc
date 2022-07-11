@@ -1,7 +1,7 @@
+#include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <assert.h>
 #include <string.h>
 
 #include "yacjson-core.h"
@@ -320,50 +320,50 @@ static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
     bool is_key_added = false;
     bool is_value_added = false;
     while ((ch = fgetc(file)) != EOF) {
-        if (ch == '\n') continue;
-        if (ch == '\t' && !is_quoted) continue;
-        if (ch == ' ' && !is_quoted) continue;
-        // Double quote can be escaped in JSON
         if (ch == '"') is_quoted = !is_quoted || buffer[pos - 1] == '\\';
-        if (ch == ':' && !is_quoted && !is_key_added) {
-            buffer[pos] = '\0';
-            strcpy(key, strtok(buffer, "\""));
-            pos = 0;
-            is_key_added = true;
-            continue;
-        }
-        if (ch == '{' && !is_quoted && is_key_added){
-            yacjson_object_add(object, key, yacjson_parse_object_from_file(file));
-            pos = 0;
-            is_value_added = true;
-            continue;
-        }
-        if (ch == '[' && !is_quoted && is_key_added) {
-            yacjson_object_add(object, key, yacjson_parse_array_from_file(file));
-            pos = 0;
-            is_value_added = true;
-            continue;
-        }
-        if (ch == ',' && !is_quoted && is_key_added) {
-            if (!is_value_added) {
-                buffer[pos] = '\0';
-                yacjson_object_add(object, key, yacjson_parse_primitive_from_string(buffer));
+        if ((ch == ' ' || ch == '\n' || ch == '\t') && !is_quoted) continue;
+        if (!is_quoted && !is_key_added) {
+            switch (ch) {
+                case ':':
+                    buffer[pos] = '\0';
+                    strcpy(key, strtok(buffer, "\""));
+                    pos = 0;
+                    is_key_added = true;
+                    continue;
             }
-            pos = 0;
-            is_key_added = false;
-            is_value_added = false;
-            continue;
         }
-        if (ch == '}' && !is_quoted && is_key_added) {
-            if (!is_value_added) {
-                buffer[pos] = '\0';
-                yacjson_object_add(object, key, yacjson_parse_primitive_from_string(buffer));
+        if (!is_quoted && is_key_added) {
+            switch (ch) {
+                case '{':
+                    yacjson_object_add(object, key, yacjson_parse_object_from_file(file));
+                    pos = 0;
+                    is_value_added = true;
+                    continue;
+                case '[':
+                    yacjson_object_add(object, key, yacjson_parse_array_from_file(file));
+                    pos = 0;
+                    is_value_added = true;
+                    continue;
+                case ',':
+                    if (!is_value_added) {
+                        buffer[pos] = '\0';
+                        yacjson_object_add(object, key, yacjson_parse_primitive_from_string(buffer));
+                    }
+                    pos = 0;
+                    is_key_added = false;
+                    is_value_added = false;
+                    continue;
+                case '}':
+                    if (!is_value_added) {
+                        buffer[pos] = '\0';
+                        yacjson_object_add(object, key, yacjson_parse_primitive_from_string(buffer));
+                    }
+                    return yacjson_value_from_object(object);
             }
-            break;
         }
         buffer[pos++] = (char) ch;
     }
-    return yacjson_value_from_object(object);
+    return NULL;
 }
 
 static YacJSONValue *yacjson_parse_array_from_file(FILE *file) {
@@ -373,42 +373,39 @@ static YacJSONValue *yacjson_parse_array_from_file(FILE *file) {
     bool is_quoted = false;
     bool is_value_added = false;
     while ((ch = fgetc(file)) != EOF) {
-        if (ch == '\n') continue;
-        if (ch == '\t' && !is_quoted) continue;
-        if (ch == ' ' && !is_quoted) continue;
-        // Double quote can be escaped in JSON
         if (ch == '"') is_quoted = !is_quoted || buffer[pos - 1] == '\\';
-        if (ch == '{' && !is_quoted) {
-            yacjson_array_add(array, yacjson_parse_object_from_file(file));
-            pos = 0;
-            is_value_added = true;
-            continue;
-        }
-        if (ch == '[' && !is_quoted) {
-            yacjson_array_add(array, yacjson_parse_array_from_file(file));
-            pos = 0;
-            is_value_added = true;
-            continue;
-        }
-        if (ch == ',' && !is_quoted) {
-            if (!is_value_added) {
-                buffer[pos] = '\0';
-                yacjson_array_add(array, yacjson_parse_primitive_from_string(buffer));
+        if ((ch == ' ' || ch == '\n' || ch == '\t') && !is_quoted) continue;
+        if (!is_quoted) {
+            switch (ch) {
+                case '{':
+                    yacjson_array_add(array, yacjson_parse_object_from_file(file));
+                    pos = 0;
+                    is_value_added = true;
+                    continue;
+                case '[':
+                    yacjson_array_add(array, yacjson_parse_array_from_file(file));
+                    pos = 0;
+                    is_value_added = true;
+                    continue;
+                case ',':
+                    if (!is_value_added) {
+                        buffer[pos] = '\0';
+                        yacjson_array_add(array, yacjson_parse_primitive_from_string(buffer));
+                    }
+                    pos = 0;
+                    is_value_added = false;
+                    continue;
+                case ']':
+                    if (!is_value_added) {
+                        buffer[pos] = '\0';
+                        yacjson_array_add(array, yacjson_parse_primitive_from_string(buffer));
+                    }
+                    return yacjson_value_from_array(array);
             }
-            pos = 0;
-            is_value_added = false;
-            continue;
-        }
-        if (ch == ']' && !is_quoted) {
-            if (!is_value_added) {
-                buffer[pos] = '\0';
-                yacjson_array_add(array, yacjson_parse_primitive_from_string(buffer));
-            }
-            break;
         }
         buffer[pos++] = (char) ch;
     }
-    return yacjson_value_from_array(array);
+    return NULL;
 }
 
 YacJSONValue *yacjson_parse(const char *filepath) {
@@ -416,54 +413,67 @@ YacJSONValue *yacjson_parse(const char *filepath) {
     assert(file != NULL);
     int ch;
     while ((ch = fgetc(file)) != EOF) {
-        if (ch == '{') return yacjson_parse_object_from_file(file);
-        if (ch == '[') return yacjson_parse_array_from_file(file);
+        switch (ch) {
+            case '{':
+                return yacjson_parse_object_from_file(file);
+            case '[':
+                return yacjson_parse_array_from_file(file);
+        }
     }
     return NULL;
 }
 
 static void yacjson_serialize_to_file(YacJSONValue *value, FILE *file, int depth) {
-    if (yacjson_value_is_boolean(value)) {
-        fprintf(file, "%s", yacjson_value_to_boolean(value) ? "true" : "false");
-    } else if (yacjson_value_is_integer(value)) {
-        fprintf(file, "%ld", yacjson_value_to_integer(value));
-    } else if (yacjson_value_is_decimal(value)) {
-        fprintf(file, "%lf", yacjson_value_to_decimal(value));
-    } else if (yacjson_value_is_string(value)) {
-        fputc('"', file);
-        fputs(yacjson_value_to_string(value), file);
-        fputc('"', file);
-    } else if (yacjson_value_is_object(value)) {
-        fputs("{\n", file);
-        YacJSONObjectItem *item;
-        YacJSONObject *object = yacjson_value_to_object(value);
-        YacJSONObjectIterator *it = yacjson_object_iterator_new(object);
-        while ((item = yacjson_object_iterator_next(it)) != NULL) {
-            for (int i = 0; i < depth; i++) fputc('\t', file);
+    switch (value->type) {
+        case YACJSON_BOOLEAN:
+            fprintf(file, "%s", yacjson_value_to_boolean(value) ? "true" : "false");
+            break;
+        case YACJSON_INTEGER:
+            fprintf(file, "%ld", yacjson_value_to_integer(value));
+            break;
+        case YACJSON_DECIMAL:
+            fprintf(file, "%lf", yacjson_value_to_decimal(value));
+            break;
+        case YACJSON_STRING:
             fputc('"', file);
-            fputs(yacjson_object_item_key(item), file);
-            fputs("\": ", file);
-            yacjson_serialize_to_file(yacjson_object_item_value(item), file, depth + 1);
-            if (yacjson_object_iterator_count(it) < yacjson_object_size(object)) fputc(',', file);
-            fputc('\n', file);
+            fputs(yacjson_value_to_string(value), file);
+            fputc('"', file);
+            break;
+        case YACJSON_OBJECT: {
+            fputs("{\n", file);
+            YacJSONObjectItem *item;
+            YacJSONObject *object = yacjson_value_to_object(value);
+            YacJSONObjectIterator *it = yacjson_object_iterator_new(object);
+            while ((item = yacjson_object_iterator_next(it)) != NULL) {
+                for (int i = 0; i < depth; i++) fputc('\t', file);
+                fputc('"', file);
+                fputs(yacjson_object_item_key(item), file);
+                fputs("\": ", file);
+                yacjson_serialize_to_file(yacjson_object_item_value(item), file, depth + 1);
+                if (yacjson_object_iterator_count(it) < yacjson_object_size(object)) fputc(',', file);
+                fputc('\n', file);
+            }
+            yacjson_object_iterator_free(it);
+            for (int i = 0; i < depth - 1; i++) fputc('\t', file);
+            fputc('}', file);
+            break;
         }
-        yacjson_object_iterator_free(it);
-        for (int i = 0; i < depth - 1; i++) fputc('\t', file);
-        fputc('}', file);
-    } else if (yacjson_value_is_array(value)) {
-        fputs("[\n", file);
-        YacJSONArrayItem *item;
-        YacJSONArray *array = yacjson_value_to_array(value);
-        YacJSONArrayIterator *it = yacjson_array_iterator_new(array);
-        while ((item = yacjson_array_iterator_next(it)) != NULL) {
-            for (int i = 0; i < depth; i++) fputc('\t', file);
-            yacjson_serialize_to_file(yacjson_array_item_value(item), file, depth + 1);
-            if (yacjson_array_iterator_count(it) < yacjson_array_size(array)) fputc(',', file);
-            fputc('\n', file);
+        case YACJSON_ARRAY: {
+            fputs("[\n", file);
+            YacJSONArrayItem *item;
+            YacJSONArray *array = yacjson_value_to_array(value);
+            YacJSONArrayIterator *it = yacjson_array_iterator_new(array);
+            while ((item = yacjson_array_iterator_next(it)) != NULL) {
+                for (int i = 0; i < depth; i++) fputc('\t', file);
+                yacjson_serialize_to_file(yacjson_array_item_value(item), file, depth + 1);
+                if (yacjson_array_iterator_count(it) < yacjson_array_size(array)) fputc(',', file);
+                fputc('\n', file);
+            }
+            yacjson_array_iterator_free(it);
+            for (int i = 0; i < depth - 1; i++) fputc('\t', file);
+            fputc(']', file);
+            break;
         }
-        yacjson_array_iterator_free(it);
-        for (int i = 0; i < depth - 1; i++) fputc('\t', file);
-        fputc(']', file);
     }
 }
 
