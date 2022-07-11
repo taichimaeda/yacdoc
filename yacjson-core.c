@@ -320,10 +320,15 @@ static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
     bool is_key_added = false;
     bool is_value_added = false;
     while ((ch = fgetc(file)) != EOF) {
-        if (ch == '"') is_quoted = !is_quoted || buffer[pos - 1] == '\\';
-        if ((ch == ' ' || ch == '\n' || ch == '\t') && !is_quoted) continue;
+        if (ch == '"') {
+            is_quoted = !is_quoted || buffer[pos - 1] == '\\';
+        }
         if (!is_quoted && !is_key_added) {
             switch (ch) {
+                case ' ':
+                case '\n':
+                case '\t':
+                    continue;
                 case ':':
                     buffer[pos] = '\0';
                     strcpy(key, strtok(buffer, "\""));
@@ -334,6 +339,10 @@ static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
         }
         if (!is_quoted && is_key_added) {
             switch (ch) {
+                case ' ':
+                case '\n':
+                case '\t':
+                    continue;
                 case '{':
                     yacjson_object_add(object, key, yacjson_parse_object_from_file(file));
                     pos = 0;
@@ -373,10 +382,15 @@ static YacJSONValue *yacjson_parse_array_from_file(FILE *file) {
     bool is_quoted = false;
     bool is_value_added = false;
     while ((ch = fgetc(file)) != EOF) {
-        if (ch == '"') is_quoted = !is_quoted || buffer[pos - 1] == '\\';
-        if ((ch == ' ' || ch == '\n' || ch == '\t') && !is_quoted) continue;
+        if (ch == '"') {
+            is_quoted = !is_quoted || buffer[pos - 1] == '\\';
+        }
         if (!is_quoted) {
             switch (ch) {
+                case ' ':
+                case '\n':
+                case '\t':
+                    continue;
                 case '{':
                     yacjson_array_add(array, yacjson_parse_object_from_file(file));
                     pos = 0;
