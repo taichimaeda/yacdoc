@@ -298,19 +298,22 @@ static YacJSONValue *yacjson_parse_primitive_from_string(char *value_string) {
     if (!strcmp(value_string, "false")) return yacjson_value_from_boolean(false);
     char *end_ptr;
     long value_integer = strtol(value_string, &end_ptr, 10);
-    if (*end_ptr == '\0') return yacjson_value_from_integer(value_integer);
+    if (*end_ptr == '\0')
+        return yacjson_value_from_integer(value_integer);
     double value_decimal = strtod(value_string, &end_ptr);
-    if (*end_ptr == '\0') return yacjson_value_from_decimal(value_decimal);
+    if (*end_ptr == '\0')
+        return yacjson_value_from_decimal(value_decimal);
     return yacjson_value_from_string(strtok(value_string, "\""));
 }
 
 static YacJSONValue *yacjson_parse_object_from_file(FILE *file);
 static YacJSONValue *yacjson_parse_array_from_file(FILE *file);
 
+// TODO: Use separate loops instead of is_key_added and is_value_added
+
 static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
     YacJSONObject *object = yacjson_object_new();
-    int ch;
-    int pos = 0;
+    int ch, pos = 0;
     static char buffer[YACJSON_MAX_BUFFER_LEN];
     char key[YACJSON_MAX_BUFFER_LEN];
     bool is_quoted = false;
@@ -365,8 +368,7 @@ static YacJSONValue *yacjson_parse_object_from_file(FILE *file) {
 
 static YacJSONValue *yacjson_parse_array_from_file(FILE *file) {
     YacJSONArray *array = yacjson_array_new();
-    int ch;
-    int pos = 0;
+    int ch, pos = 0;
     static char buffer[YACJSON_MAX_BUFFER_LEN];
     bool is_quoted = false;
     bool is_value_added = false;
