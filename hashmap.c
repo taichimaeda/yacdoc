@@ -1,8 +1,8 @@
+#include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
-#include <stdbool.h>
 
 #include "hashmap.h"
 
@@ -53,7 +53,7 @@ static void yacdoc_hashmap_resize(YacDocHashMap *map) {
     }
 }
 
-bool yacdoc_hashmap_add(YacDocHashMap *map, const char* key, void *value) {
+bool yacdoc_hashmap_add(YacDocHashMap *map, const char *key, void *value) {
     if (map->size == map->capacity) {
         yacdoc_hashmap_resize(map);
     }
@@ -77,12 +77,12 @@ bool yacdoc_hashmap_add(YacDocHashMap *map, const char* key, void *value) {
     return true;
 }
 
-void *yacdoc_hashmap_get(YacDocHashMap *map, const char* key) {
+void *yacdoc_hashmap_get(YacDocHashMap *map, const char *key) {
     int hash = yacdoc_djb2_hash(key);
     int index = yacdoc_positive_mod(hash, map->capacity);
     int count = 0;
     while (map->items[index] != NULL && count < map->capacity) {
-        if (!strcmp(map->items[index]->key ,key)) {
+        if (!strcmp(map->items[index]->key, key)) {
             return map->items[index]->value;
         }
         index++;
