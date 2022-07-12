@@ -1,0 +1,11 @@
+IndentWidth: 4
+ColumnLimit: 0
+SpaceAfterCStyleCast: true
+IndentCaseLabels: true
+BreakBeforeBraces: Attach
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: true
