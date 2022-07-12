@@ -33,6 +33,22 @@ static YacXMLElement *yacxml_child_map_get(YacXMLChildMap *chs, const char *key)
     return yacdoc_hashmap_get(chs, key);
 }
 
+YacXMLAttributeMapIterator *yacxml_attribute_map_iterator_new(YacXMLAttributeMap *attrs) {
+    return yacdoc_hashmap_iterator_new(attrs);
+}
+
+YacXMLChildMapIterator *yacxml_child_map_iterator_new(YacXMLChildMap *chs) {
+    return yacdoc_hashmap_iterator_new(chs);
+}
+
+YacXMLAttributeMapItem *yacxml_attribute_map_iterator_next(YacXMLAttributeMapIterator *it) {
+    return yacdoc_hashmap_iterator_next(it);
+}
+
+YacXMLChildMapItem *yacxml_child_map_iterator_next(YacXMLChildMapIterator *it) {
+    return yacdoc_hashmap_iterator_next(it);
+}
+
 YacXMLElement *yacxml_element_new() {
     YacXMLElement *elem = malloc(sizeof(YacXMLElement));
     assert(elem != NULL);
@@ -255,4 +271,44 @@ YacXMLElement *yacxml_parse(const char *filepath) {
     YacXMLElement *elem = yacxml_parse_from_file(file);
     fclose(file);
     return elem;
+}
+
+static void yacxml_serialize_to_file(YacXMLElement *elem, FILE *file, int depth) {
+    for (int i = 0; i < depth - 1; i++) fputc('\t', file);
+    fputc('<', file);
+    fputs(elem->name, file);
+    YacXMLAttributeMapItem *attr_item;
+    YacXMLAttributeMapIterator *attr_it = yacxml_attribute_map_iterator_new(elem->attributes);
+    while ((attr_item = yacxml_attribute_map_iterator_next(attr_it)) != NULL) {
+        fputc(' ', file);
+        fputs(attr_item->key, file);
+        fputs("=\"", file);
+        fputs(attr_item->value, file);
+        fputc('\"', file);
+    }
+    if (!strcmp(elem->text, "") && elem->children->size == 0) {
+        fputs("/>\n", file);
+        return;
+    }
+    fputs(">\n", file);
+    if (strcmp(elem->text, "")) {
+        for (int i = 0; i < depth; i++) fputc('\t', file);
+        fputs(elem->text, file);
+        fputc('\n', file);
+    }
+    YacXMLChildMapItem *ch_item;
+    YacXMLChildMapIterator *ch_it = yacxml_child_map_iterator_new(elem->children);
+    while ((ch_item = yacxml_child_map_iterator_next(ch_it)) != NULL) {
+        yacxml_serialize_to_file(ch_item->value, file, depth + 1);
+    }
+    for (int i = 0; i < depth - 1; i++) fputc('\t', file);
+    fputs("</", file);
+    fputs(elem->name, file);
+    fputs(">\n", file);
+}
+
+void yacxml_serialize(YacXMLElement *elem, const char *filepath) {
+    FILE *file = fopen(filepath, "w");
+    yacxml_serialize_to_file(elem, file, 1);
+    fclose(file);
 }

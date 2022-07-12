@@ -12,9 +12,10 @@ int main(void) {
     // yacjson_serialize(value, "./tests/tests_out.json");
     // yacjson_value_free(value);
     YacXMLElement *elem = yacxml_parse("./tests/test.xml");
-    puts(yacxml_element_get_attribute(elem, "name"));
-    YacXMLElement *child = yacxml_element_get_child(yacxml_element_get_child(yacxml_element_get_child(elem, "consist"), "equal"), "quietly");
-    puts(yacxml_element_get_attribute(child, "nearby"));
+    YacXMLElement *child = yacxml_element_get_child(yacxml_element_get_child(elem, "consist"), "off");
+    puts(yacxml_element_get_attribute(child, "asleep"));
     puts(yacxml_element_get_text(child));
+    yacxml_serialize(elem, "./tests/test_out.xml");
+    yacxml_element_free(elem);
     return EXIT_SUCCESS;
 }
